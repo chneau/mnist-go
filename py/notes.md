@@ -1,5 +1,7 @@
 # py
 
+source: https://keras.io/examples/mnist_cnn/  
+
 ## pip installed
 
 - keras
