@@ -9,15 +9,13 @@ import (
 
 var baseURL = "https://raw.githubusercontent.com/cazala/mnist/master/src/digits/%d.json"
 
-type Mnist struct {
-	data map[int][][]float32
+type Mnist map[int][][]float32
+
+func (m Mnist) Get(n int) [][]float32 {
+	return m[n]
 }
 
-func (m *Mnist) Get(n int) [][]float32 {
-	return m.data[n]
-}
-
-func (m *Mnist) Initiliaze() error {
+func (m Mnist) Initiliaze() error {
 	mtx := &sync.Mutex{}
 	wg := &sync.WaitGroup{}
 	errors := []error{}
@@ -49,7 +47,7 @@ func (m *Mnist) Initiliaze() error {
 			for i := 0; i < len(x.Data); i += 28 * 28 {
 				result = append(result, x.Data[i:i+28*28])
 			}
-			m.data[i] = result
+			m[i] = result
 		}()
 	}
 	wg.Wait()
@@ -59,9 +57,7 @@ func (m *Mnist) Initiliaze() error {
 	return nil
 }
 
-func New() *Mnist {
-	m := &Mnist{
-		data: map[int][][]float32{},
-	}
+func New() Mnist {
+	m := Mnist{}
 	return m
 }

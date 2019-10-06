@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
+	"testing"
+	"time"
 
 	"github.com/chneau/mnist-go/pkg/mnist"
 
@@ -73,22 +76,30 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	defer tt.T()()
-	total := 0
-	for i := 0; i < 10; i++ {
-		for _, test := range mnst.Get(i) {
-			c.SetInput(0, tensor.New(tensor.WithBacking(test)))
+	data := mnst.Get(0)
+	data = append(data, mnst.Get(1)...)
+	data = append(data, mnst.Get(2)...)
+	data = append(data, mnst.Get(3)...)
+	data = append(data, mnst.Get(4)...)
+	data = append(data, mnst.Get(5)...)
+	data = append(data, mnst.Get(6)...)
+	data = append(data, mnst.Get(7)...)
+	data = append(data, mnst.Get(8)...)
+	data = append(data, mnst.Get(9)...)
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(data), func(i, j int) { data[i], data[j] = data[j], data[i] })
+	x := testing.Benchmark(func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			c.SetInput(0, tensor.New(tensor.WithBacking(data[i%len(data)])))
 			err := c.Run()
 			if err != nil {
 				log.Fatalln(err)
 			}
-			output, err := c.GetOutputTensors()
+			_, err = c.GetOutputTensors()
 			if err != nil {
 				log.Fatalln(err)
 			}
-			fmt.Println(output[0].Data())
-			total++
 		}
-	}
-	log.Println(total)
+	})
+	println("x: ", x.String(), x.MemString())
 }
